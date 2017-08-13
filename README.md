@@ -2,7 +2,7 @@
 
 Contents include FishTank executable for Linux and R functions for calibration.
 
-FishTank executable was created from `~/CGEM` repository at http://github.com/USEPA/CGEM, master branch.  Always track development in the CGEM branch.
+### Compile FishTank in CGEM repo
 
 From `~/CGEM` repository, compile the latest version of FishTank:
 ```bash
@@ -10,6 +10,12 @@ cd CGEM
 module add intel
 source modules.sh
 make
+```
+
+The new compiled version of FishTank can be copied to a new directory:
+
+```bash
+cp CGEM/FishTank.exe ../FishTank_cal
 ```
 
 Available modules can be viewed:
@@ -35,4 +41,14 @@ cd NETCDF
 mv output.000000.nc cgem_0D.nc
 Rscript make_plots_0D.R cgem
 evince cgem_0D.pdf
+```
+
+### Running FishTank in current repo
+
+The appropriate modules must be loaded:
+
+```bash
+module add intel
+source ../CGEM/CGEM/modules.sh
+./FishTank.exe
 ```
