@@ -312,12 +312,12 @@ p1z1_swtch <- function(to = TRUE){
   if(to){
     
     # model dimensions file
-    mod_dim <- readLines('data/FishTank/Model_Dim.txt')
+    mod_dim <- readLines('data/FishTank/Model_dim.txt')
     phytsel <- grep('nospA', mod_dim)
     zoopsel <- grep('nospZ', mod_dim)
     mod_dim[phytsel] <- gsub('^[6]', '1', mod_dim[phytsel])
     mod_dim[zoopsel] <- gsub('^[2]', '1', mod_dim[zoopsel])
-    writeLines(mod_dim, 'data/FishTank/Model_Dim.txt')
+    writeLines(mod_dim, 'data/FishTank/Model_dim.txt')
     
     # InitialConditions, remove 2-6 phyto and 2 zoop
     inits <- readLines('InitialConditions.txt')
@@ -336,12 +336,12 @@ p1z1_swtch <- function(to = TRUE){
   } else {
 
     # model dimensions file
-    mod_dim <- readLines('data/FishTank/Model_Dim.txt')
+    mod_dim <- readLines('data/FishTank/Model_dim.txt')
     phytsel <- grep('nospA', mod_dim)
     zoopsel <- grep('nospZ', mod_dim)
     mod_dim[phytsel] <- gsub('^[1]', '6', mod_dim[phytsel])
     mod_dim[zoopsel] <- gsub('^[1]', '2', mod_dim[zoopsel])
-    writeLines(mod_dim, 'data/FishTank/Model_Dim.txt')
+    writeLines(mod_dim, 'data/FishTank/Model_dim.txt')
     
   }
  
@@ -2032,6 +2032,9 @@ fishopt <- function(pars, minv, maxv, ...){
     
     cat(pars, '\n')
     
+    # load hobo data for individual treatments
+    load(file = 'rdata/flaskhobo.RData')
+    
     # change start, end times
     # make system completely closed
     parsdts <- c(
@@ -2039,7 +2042,7 @@ fishopt <- function(pars, minv, maxv, ...){
       '^- starting.*_1$' = 2013,
       '^- starting.*_2$' = 9,
       '^- starting.*_3$' = 25,
-      '^- starting.*_4$' = 7,
+      '^- starting.*_4$' = 8,
       '^- starting.*_4$' = 40,
       '^- ending.*_1$' = 2013,
       '^- ending.*_2$' = 9,
@@ -2072,7 +2075,6 @@ fishopt <- function(pars, minv, maxv, ...){
         'NO3' = 18.2,
         'PO4' = 0.13,
         'DIC' = 2000,
-        'O2' = 201, # initial starting value 
         'OM1_A' = 57.7,
         'OM2_A' = 243,
         'OM1_fp' = 0,
@@ -2085,11 +2087,21 @@ fishopt <- function(pars, minv, maxv, ...){
         'OM2_bc' = 0
       )
 
-      # get starting nutrients
+      ## get starting values for the treatment from obs
+      
+      # nh4
       inps$NH4 <- obs[obs$tmt %in% i, 'NH4'] %>% 
         as.numeric
+      
+      # o2
+      inps$O2<- obs[obs$tmt %in% i, 'sttO2'] %>% 
+        as.numeric
     
-      # run the model with parameters
+      ## set input PAR and temp files      
+      exp_inp(flaskhobo, getvar = 'par', gettmt = i)
+      exp_inp(flaskhobo, getvar = 'temp', gettmt = i)
+      
+      ## run the model with parameters
       # sometimes fishtank crashes, so try again until it works
       p <- try({run_mod(parsdts, inps = inps, p1z1 = T)[[1]]})
       while(class(p) == 'try-error'){
@@ -2156,7 +2168,7 @@ fishopt <- function(pars, minv, maxv, ...){
 #
 # flaskhobo data frame with temperature, solar data for three treatments on a given date
 # var variable to create, temp or lt
-exp_inp <- function(flaskhobo, getvar = c('temp', 'par'), gettmt = c('lt', 'nt', 'ltnt')){
+exp_inp <- function(flaskhobo, getvar = c('temp', 'par'), gettmt = c('lt', 'dk', 'ltnt')){
   
   # get arguments
   getvar <- match.arg(getvar)
@@ -2170,15 +2182,21 @@ exp_inp <- function(flaskhobo, getvar = c('temp', 'par'), gettmt = c('lt', 'nt',
       iYr = year(datetime),
       iMon = month(datetime),
       iDay = day(datetime), 
+      iHour = hour(datetime),
       iMin = minute(datetime), 
       iSec = second(datetime), 
       Var1 = val
     ) %>% 
-    select(iYr, iMon, iDay, iMin, iSec, Var1)
+    select(iYr, iMon, iDay, iHour, iMin, iSec, Var1)
 
+  # switch getvar for correct name
+  getvar <- switch(getvar,
+                  temp = 'Temp', 
+                  par = 'Solar'
+    )
+  
   # output directory and write
-  outdir <- toupper(getvar) %>% 
-      paste0('data/', ., '.dat')
+  outdir <- paste0('data/FishTank/INPUT/', getvar, '.dat')
   write.table(fl, outdir, sep = '\t', row.names = FALSE, quote = FALSE, col.names = FALSE)
   
 }

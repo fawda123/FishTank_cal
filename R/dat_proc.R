@@ -10,6 +10,7 @@ library(WtRegDO)
 library(lubridate)
 library(oce)
 library(ncdf4)
+library(tibble)
 
 ##
 # calibrating to parameter subsets
@@ -35,7 +36,7 @@ for(idpar in names(idpars)){
   maxv <- parsin$maxv
 
   # calibrate
-  res <- fishopt(vals, minv, maxv, trt = 'lt', factr = 1e9)
+  res <- fishopt(vals, minv, maxv, factr = 1e9)
 
   # append to output, save as you
   cals[[idpar]] <- res
