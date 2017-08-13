@@ -1,8 +1,6 @@
 # a caller for state variable labels
 labels_fun <- function(){
   
-  library(ncdf4)
-  
   if(!file.exists('NETCDF/output.000000.nc'))
     stop('Run model to get labels')
 
@@ -36,8 +34,6 @@ labels_fun <- function(){
 #
 # parsin can be a chr string of file location of original InitialConditions.txt or input data frame of input conditions to be converted to ASCII format, the data frame is the output from the ASCII text file, but there's an additional function that replaces parameters in the data frame for conversion to the standard GEM format
 forminps <- function(parsin){
- 
-  library(dplyr)
   
   # data frame to input file  
   if(inherits(parsin, 'data.frame')){
@@ -72,8 +68,6 @@ forminps <- function(parsin){
 #
 # parsin can be a chr string of file location of original GEM_InputFile or input data frame of parameters to be converted to ASCII format, the data frame is the ouput from the ASCII text file, but there's an additional function that replaces parameters in the data frame for conversion to the standard GEM format
 formpars <- function(parsin){
- 
-  library(dplyr)
   
   # data frame to input file  
   if(inherits(parsin, 'data.frame')){
@@ -97,7 +91,7 @@ formpars <- function(parsin){
 
     # add category labels and NA rows above
     # added by index but with decimal change for ordering
-    cats <- c('Simulation Specifics', 'Switches in GEM', 'Optics', 'Temperature', 'Phytoplankton, up to 6 types', 'Zooplankton, up to 2 types', 'Organic Matter', 'River Loads - used in 3D only', 'Other including Boundary Conditions') 
+    cats <- c('Simulation Specifics', 'Switches in GEM', 'Optics', 'Temperature', 'Phytoplankton, up to 6 types', 'Zooplankton, up to 2 types', 'Organic Matter', 'Other including Boundary Conditions') 
     cats <- paste0('!', cats)
     locs <- grep('starting time|^!Which_fluxes|^!Kw$|^!Tref|^!ediblevector\\(Z1|^!Zeffic|^!KG1$|^!rcNO3|^!Which_VMix', tmp$parm, ignore.case = F)
     locs <- locs - 0.01
@@ -142,7 +136,7 @@ formpars <- function(parsin){
     names(tmp) <- nms
 
     # list elements that contain parameters (inverse of notparms)
-    cats <- c('Simulation Specifics', 'Switches in GEM', 'Optics', 'Temperature', 'Phytoplankton, up to 6 types', 'Zooplankton, up to 2 types', 'Organic Matter', 'River Loads - used in 3D only', 'Other including Boundary Conditions') 
+    cats <- c('Simulation Specifics', 'Switches in GEM', 'Optics', 'Temperature', 'Phytoplankton, up to 6 types', 'Zooplankton, up to 2 types', 'Organic Matter', 'Other including Boundary Conditions') 
     notparms <- which(nms %in% cats)
     if(length(notparms) != length(cats)) stop('Cannot find all parameter categories in input file')
     notparms <- sort(c(as.numeric(which(is.na(tmp))), notparms))
@@ -178,8 +172,6 @@ formpars <- function(parsin){
 # partial string matching is used for the names to replace values in a default input list
 # passing NULL to inps will return the existing input conditions file
 setinps <- function(inps = NULL){
-   
-  library(dplyr)
   
   # load default parameter file
   load('input/InitialConditions.RData')
@@ -231,9 +223,7 @@ setinps <- function(inps = NULL){
 # partial string matching is used for the element names to replace values in a default parameter list
 # passing NULL to pars will return the default parameter list for Weeks Bay
 setpars <- function(pars = NULL){
-  
-  library(dplyr)
-  
+
   # load default parameter file
   load('input/GEM_InputFile.RData')
   
@@ -322,18 +312,18 @@ p1z1_swtch <- function(to = TRUE){
   if(to){
     
     # model dimensions file
-    mod_dim <- readLines('data/Model_Dim.txt')
+    mod_dim <- readLines('data/FishTank/Model_Dim.txt')
     phytsel <- grep('nospA', mod_dim)
     zoopsel <- grep('nospZ', mod_dim)
     mod_dim[phytsel] <- gsub('^[6]', '1', mod_dim[phytsel])
     mod_dim[zoopsel] <- gsub('^[2]', '1', mod_dim[zoopsel])
-    writeLines(mod_dim, 'data/Model_Dim.txt')
+    writeLines(mod_dim, 'data/FishTank/Model_Dim.txt')
     
     # InitialConditions, remove 2-6 phyto and 2 zoop
     inits <- readLines('InitialConditions.txt')
     rm <- grep('A[2-6]$|n[2-6]$|p[2-6]$|G[2]$', inits)
     inits <- inits[-rm]
-    writeLines(inits, 'InitialConditions.txt')
+    writeLines(inits, 'data/FishTank/InitialConditions.txt')
     
     # GEM_InputFile
     gem_inp <- readLines('GEM_InputFile')
@@ -346,12 +336,12 @@ p1z1_swtch <- function(to = TRUE){
   } else {
 
     # model dimensions file
-    mod_dim <- readLines('data/Model_Dim.txt')
+    mod_dim <- readLines('data/FishTank/Model_Dim.txt')
     phytsel <- grep('nospA', mod_dim)
     zoopsel <- grep('nospZ', mod_dim)
     mod_dim[phytsel] <- gsub('^[1]', '6', mod_dim[phytsel])
     mod_dim[zoopsel] <- gsub('^[1]', '2', mod_dim[zoopsel])
-    writeLines(mod_dim, 'data/Model_Dim.txt')
+    writeLines(mod_dim, 'data/FishTank/Model_Dim.txt')
     
   }
  
@@ -371,9 +361,7 @@ p1z1_swtch <- function(to = TRUE){
 # the netcdf file is also deleted on function exit
 # function will exit with error if model fails
 run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
-  
-  library(ncdf4)
-  
+
   # create parameter file based on inputs
   setpars(pars)
   
@@ -382,7 +370,8 @@ run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
 
   # move the input files from input to root
   fls <- c('input/InitialConditions.txt', 'input/GEM_InputFile')
-  file.copy(fls, getwd(), overwrite = TRUE)
+  file.copy(fls[1], 'data/FishTank', overwrite = TRUE)
+  file.copy(fls[2], getwd(), overwrite = TRUE)
   
   # set to one phyto, one zoop group if TRUE
   if(p1z1) p1z1_swtch(to = TRUE)
@@ -393,7 +382,7 @@ run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
     file.remove('NETCDF/output.000000.nc')
   
   # run model, suppress output messages
-  system('FishTank.exe')
+  system('./FishTank.exe')
 
   # exist if it didn't work
   if(!file.exists(fl)){
@@ -429,7 +418,7 @@ run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
       if(sum(sel) != 4) stop('Check hard-coded organic variables')
       
       # get each variable, take rowsums
-      var <- sapply(out_var_OM, function(x) ncvar_get(nc, x)[1, ]) %>% 
+      var <- sapply(out_var_OM, function(x) ncvar_get(nc, x)) %>% 
         rowSums
   
     } else {
@@ -438,7 +427,7 @@ run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
       if(sum(sel) == 0) stop(paste(ov, 'not found in model output'))
       
       # get variable
-      var <- ncvar_get(nc, ov)[1, ]
+      var <- ncvar_get(nc, ov)
       
     }
   
@@ -1790,8 +1779,6 @@ parcats2 <- function(as_df = FALSE){
 # frm chr string indicating format of output, tex or exp for latex or expression
 par_txt <- function(parin, frm = 'tex'){
 
-  library(dplyr)
-  
   # sanity check
   if(!frm %in% c('tex', 'exp'))
     stop('frm argument must be "tex" or "exp"')
@@ -1907,7 +1894,7 @@ get_cmbs <- function(tocal_all, out_var = 'O2', thrsh = 15, coll = TRUE, errs = 
   
   # expected parameter values and ranges
   allp <- get(load(file = 'input/GEM_InputFile.RData'))
-  rngs <- formpars('ignore/var_ranges.txt')
+  rngs <- get(load(file = 'rdata/rngs.RData'))
   
   # get out_var results, melt, create heurist column, filter by thresh, 
   # add temp category (one parameter), combine with input file to get values
@@ -2102,7 +2089,7 @@ fishopt <- function(pars, minv, maxv, ...){
       inps$NH4 <- obs[obs$tmt %in% i, 'NH4'] %>% 
         as.numeric
     
-      # run the model with parameters and weeks bay conditions
+      # run the model with parameters
       # sometimes fishtank crashes, so try again until it works
       p <- try({run_mod(parsdts, inps = inps, p1z1 = T)[[1]]})
       while(class(p) == 'try-error'){
@@ -2171,9 +2158,6 @@ fishopt <- function(pars, minv, maxv, ...){
 # var variable to create, temp or lt
 exp_inp <- function(flaskhobo, getvar = c('temp', 'par'), gettmt = c('lt', 'nt', 'ltnt')){
   
-  library(lubridate)
-  library(tidyverse)
-
   # get arguments
   getvar <- match.arg(getvar)
   gettmt <- match.arg(gettmt)

@@ -4,10 +4,12 @@
 source('R/funcs.R')
 library(FME)
 library(SWMPr)
-library(tidyverse)
+library(tidyr)
+library(dplyr)
 library(WtRegDO)
 library(lubridate)
 library(oce)
+library(ncdf4)
 
 ##
 # calibrating to parameter subsets
