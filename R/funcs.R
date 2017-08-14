@@ -2032,9 +2032,6 @@ fishopt <- function(pars, minv, maxv, ...){
     
     cat(pars, '\n')
     
-    # load hobo data for individual treatments
-    load(file = 'rdata/flaskhobo.RData')
-    
     # change start, end times
     # make system completely closed
     parsdts <- c(
@@ -2090,7 +2087,8 @@ fishopt <- function(pars, minv, maxv, ...){
       inps$PO4 <- obs[obs$tmt %in% i, 'PO4'] %>% 
         as.numeric
       
-      ## set input PAR and temp files      
+      ## set input PAR and temp files    
+      load(file = 'rdata/flaskhobo.RData')
       exp_inp(flaskhobo, getvar = 'par', gettmt = i)
       exp_inp(flaskhobo, getvar = 'temp', gettmt = i)
       
