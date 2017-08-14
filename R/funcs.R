@@ -2048,8 +2048,8 @@ fishopt <- function(pars, minv, maxv, ...){
       '^- ending.*_2$' = 9,
       '^- ending.*_3$' = 25,
       '^- ending.*_4$' = 19,
-      'ReadVars_1' = 0,
-      'ReadVars_3' = 0,
+      'ReadVars_1' = 1,
+      'ReadVars_3' = 1,
       '- dT (timestep, seconds); dT_out (output interval, seconds)_1' = 300, 
       '- dT (timestep, seconds); dT_out (output interval, seconds)_2' = 600, 
       'Which_fluxes_1' = 0, # O2 exchange off
@@ -2066,39 +2066,30 @@ fishopt <- function(pars, minv, maxv, ...){
     names(restmp) <- trt
     for(i in trt){
       
-      cat('\t', i)
+      ##
+      # initial conditions, spam 9/25/13
       
-      # initial conditions
+      # same between treatments
       inps <- list(
-        'A1' = 1.33e9,	
-        'Qn1' = 0.30649887e-8,
-        'Qp1' = 0.19438481e-9,
-        'G1' = 340,
-        'NO3' = 18.2,
-        'PO4' = 0.13,
-        'DIC' = 2000,
-        'OM1_A' = 57.7,
-        'OM2_A' = 243,
-        'OM1_fp' = 0,
-        'OM2_fp' = 0,
-        'OM1_rp' = 0,
-        'OM2_rp' = 0,
-        'CDOM' = 0.68,
-        'Si' = 64.8,
-        'OM1_bc' = 0,
-        'OM2_bc' = 0
+        'CDOM' = 30,
+        'Si' = 38.4, 
+        'O2' = 200.7809
       )
 
-      ## get starting values for the treatment from obs
+      # these change depending on treatment
       
       # nh4
       inps$NH4 <- obs[obs$tmt %in% i, 'NH4'] %>% 
         as.numeric
       
-      # o2
-      inps$O2<- obs[obs$tmt %in% i, 'sttO2'] %>% 
+      # no3
+      inps$NO3 <- obs[obs$tmt %in% i, 'NO3'] %>% 
         as.numeric
-    
+      
+      # po4
+      inps$PO4 <- obs[obs$tmt %in% i, 'PO4'] %>% 
+        as.numeric
+      
       ## set input PAR and temp files      
       exp_inp(flaskhobo, getvar = 'par', gettmt = i)
       exp_inp(flaskhobo, getvar = 'temp', gettmt = i)
