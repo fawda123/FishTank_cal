@@ -3,96 +3,45 @@
 
 source('R/funcs.R')
 library(FME)
-library(SWMPr)
 library(tidyr)
 library(dplyr)
-library(WtRegDO)
 library(lubridate)
-library(oce)
 library(ncdf4)
 library(tibble)
 
 ##
-# sensitivity of all state variables (most)
+# calibrating to parameter subsets
 
-# state variables to evaluate
-sts <- c('Chla_mg_tot', 'O2', 'OM1', 'OM2', 'PO4', 'NH4', 'NO3', 'irradiance')
-sts <- sort(sts)
+rm(list = ls())
+source('R/funcs.R')
 
-# parameters to eval
-pars <- par_tst()
+load(file = 'rdata/tocal_all.RData')
 
-# sens eval for all state variables and relevant pars
-sens_ests_all <- sensfun(pars = pars, out_var = sts, p1z1 = TRUE)
+idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE)
 
-# save
-save(sens_ests_all, file = 'rdata/sens_ests_all.RData', compress = 'xz')
+cals <- vector('list', length = length(idpars))
+names(cals) <- names(idpars)
+for(idpar in names(idpars)){
 
-##
-# for all state variables, combine individual sensitivity estimates with categories
-# retain those that are not zero or not NA (NA means the orig value was set to zero)
+ # output
+ cat(idpar, '\n')
 
-load(file = 'rdata/sens_ests_all.RData')
+ # get heurist and parameter subsets
+ parsin <- idpars[[idpar]]
+ vals <- parsin$vals
+ minv <- parsin$minv
+ maxv <- parsin$maxv
 
-# get parameter, cat labels
-cats <- reshape2::melt(parcats()) %>% 
-  dplyr::select(L1, L2) %>% 
-  rename(Category = L1, Parameter = L2) 
+ # calibrate
+ res <- fishopt(vals, minv, maxv)
 
-# sens_ests_all <- sens_ests_all[!names(sens_ests_all) %in% 'PO4']
-# get sens, merge with cats, arrange by cat
-sens_ests_cat_all <- lapply(sens_ests_all, function(x){
+ # append to output, save as you
+ cals[[idpar]] <- res
+ save(cals, file = 'rdata/cals.RData', compress = 'xz')
 
-  out <- dplyr::select(x$sens, Parameter, L1) %>% 
-    rename(
-      error = L1
-    ) %>% 
-    left_join(cats, by = 'Parameter') %>% 
-    dplyr::filter(error > 0 & !is.na(error)) %>% 
-    group_by(Category) %>% 
-    arrange(error) %>% 
-    ungroup %>% 
-    mutate(Parameter = factor(Parameter, levels = Parameter))
-  
-  return(out)
-  
-})
+}
 
-save(sens_ests_cat_all, file = 'rdata/sens_ests_cat_all.RData', compress = 'xz')
-
-# ##
-# # calibrating to parameter subsets
-# 
-# rm(list = ls())
-# source('R/funcs.R')
-# 
-# load(file = 'rdata/tocal_all.RData')
-# 
-# idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE)
-# 
-# cals <- vector('list', length = length(idpars))
-# names(cals) <- names(idpars)
-# for(idpar in names(idpars)){
-# 
-#   # output
-#   cat(idpar, '\n')
-# 
-#   # get heurist and parameter subsets
-#   parsin <- idpars[[idpar]]
-#   vals <- parsin$vals
-#   minv <- parsin$minv
-#   maxv <- parsin$maxv
-# 
-#   # calibrate
-#   res <- fishopt(vals, minv, maxv, factr = 1e9)
-# 
-#   # append to output, save as you
-#   cals[[idpar]] <- res
-#   save(cals, file = 'rdata/cals.RData', compress = 'xz')
-# 
-# }
-# 
-# save(cals, file = 'rdata/cals.RData', compress = 'xz')
+save(cals, file = 'rdata/cals.RData', compress = 'xz')
 
 #######
 # reset RData input file from ignore folder when done
