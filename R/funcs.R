@@ -320,7 +320,7 @@ p1z1_swtch <- function(to = TRUE){
     writeLines(mod_dim, 'data/FishTank/Model_dim.txt')
     
     # InitialConditions, remove 2-6 phyto and 2 zoop
-    inits <- readLines('InitialConditions.txt')
+    inits <- readLines('data/FishTank/InitialConditions.txt')
     rm <- grep('A[2-6]$|n[2-6]$|p[2-6]$|G[2]$', inits)
     inits <- inits[-rm]
     writeLines(inits, 'data/FishTank/InitialConditions.txt')
@@ -2048,8 +2048,8 @@ fishopt <- function(pars, minv, maxv, ...){
       '^- ending.*_2$' = 9,
       '^- ending.*_3$' = 25,
       '^- ending.*_4$' = 19,
-      'ReadVars_1' = 1,
-      'ReadVars_3' = 1,
+      'ReadVars_1' = 0,
+      'ReadVars_3' = 0,
       '- dT (timestep, seconds); dT_out (output interval, seconds)_1' = 300, 
       '- dT (timestep, seconds); dT_out (output interval, seconds)_2' = 600, 
       'Which_fluxes_1' = 0, # O2 exchange off
