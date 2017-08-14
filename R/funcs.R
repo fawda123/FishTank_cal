@@ -1948,8 +1948,8 @@ get_cmbs <- function(tocal_all, out_var = 'O2', thrsh = 15, coll = TRUE, errs = 
       
       # change minv maxv to +- pert if not null
       if(!is.null(pert)){
-        x$minv <- pert * as.numeric(x$vals)
-        x$maxv <- (1 + pert) * as.numeric(x$vals)
+        x$minv <- as.numeric(x$vals) - pert * as.numeric(x$vals)
+        x$maxv <- as.numeric(x$vals) + pert * as.numeric(x$vals)
       }
       
       # get value, min, max of each parameter
