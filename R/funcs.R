@@ -2048,6 +2048,8 @@ fishopt <- function(pars, minv, maxv, ...){
       '^- ending.*_2$' = 9,
       '^- ending.*_3$' = 25,
       '^- ending.*_4$' = 19,
+      'ReadVars_1' = 1,
+      'ReadVars_3' = 1,
       '- dT (timestep, seconds); dT_out (output interval, seconds)_1' = 300, 
       '- dT (timestep, seconds); dT_out (output interval, seconds)_2' = 600, 
       'Which_fluxes_1' = 0, # O2 exchange off

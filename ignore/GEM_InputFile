@@ -17,7 +17,7 @@
 1		!Which_chlaC: 1==fixed C:Chl-a, 2==Cloern chl:C
 2		!Which_photosynthesis: 1==photoinhibition, 2==without photoinhibition, 3==nutrient dependent, 4==GoMDOM
 1		!Which_growth: 1==minimum, 2==product formulation, 3==umax is nutrient dependent, Specific growth rate
-1 0 1 0         !ReadVars: Solar=Calculate(0),Read(1); Wind== 5mph(0) or Read(1), Temp== cosine w/params(0) or Read(1), Sal== Read one value(0) or Read(1)
+0 0 0 0         !ReadVars: Solar=Calculate(0),Read(1); Wind== 5mph(0) or Read(1), Temp== cosine w/params(0) or Read(1), Sal== Read one value(0) or Read(1)
 0		!InitializeHow: 0==Read File, 1==Salinity Regression
 
 !Optics
