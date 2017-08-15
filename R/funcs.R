@@ -382,7 +382,7 @@ run_mod <- function(pars = NULL, inps = NULL, out_var = 'O2', p1z1 = FALSE){
     file.remove('NETCDF/output.000000.nc')
   
   # run model, suppress output messages
-  system('./FishTank.exe')
+  system('./FishTank.exe > /dev/null')
 
   # exist if it didn't work
   if(!file.exists(fl)){
@@ -1884,7 +1884,8 @@ par_tst <- function(){
 # thrsh numeric for collinearity thresholds
 # coll logical if gamma is returned as an additional element for each heuristic
 # errs logical if errors for each parameter in the set are returned for each heuristic
-#
+# pert numeric optional value to fix min/max ranges of parameters for optimization as plus/minus the parameter times the proportion in pert, minv/maxv values from rngs are used if not supplied
+# 
 # temperature is manually added as a category in the first heuristic
 # only one parameter so wasn't included in tocal_all output
 #
@@ -2123,6 +2124,7 @@ fishopt <- function(pars, minv, maxv, ...){
 
     # get errors, append to output
     err <- with(obs, sqrt(mean((endO2 - modO2)^2)))
+    
     cat('\n\t', err, '\n\n')
     mat <<- rbind(mat, c(unlist(pars), err))
     

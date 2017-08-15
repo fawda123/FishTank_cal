@@ -12,16 +12,13 @@ library(tibble)
 ##
 # calibrating to parameter subsets
 
-rm(list = ls())
-source('R/funcs.R')
-
 load(file = 'rdata/tocal_all.RData')
 
-idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE)
+idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE, pert = 0.5)
 
 cals <- vector('list', length = length(idpars))
 names(cals) <- names(idpars)
-for(idpar in names(idpars)){
+for(idpar in names(idpars)[4]){
 
  # output
  cat(idpar, '\n')
