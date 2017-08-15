@@ -14,11 +14,11 @@ library(tibble)
 
 load(file = 'rdata/tocal_all.RData')
 
-idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE, pert = 0.5)
+idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE, pert = NULL)
 
 cals <- vector('list', length = length(idpars))
 names(cals) <- names(idpars)
-for(idpar in names(idpars)[4]){
+for(idpar in names(idpars)){
 
  # output
  cat(idpar, '\n')
