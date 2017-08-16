@@ -2059,39 +2059,38 @@ fishopt <- function(pars, minv, maxv, ...){
     
     # iterate through treatments
     # restmp is for intermediate model predictions
-    trt <- unique(obs$tmt)
-    restmp <- vector('list', length = length(trt))
-    names(restmp) <- trt
-    for(i in trt){
+    tmt_rep <- unique(obs$tmt_rep)
+    restmp <- vector('list', length = length(tmt_rep))
+    names(restmp) <- tmt_rep
+    for(i in tmt_rep){
       
       ##
       # initial conditions, spam 9/25/13
       
-      # same between treatments
+      # same between treatments, reps
       inps <- list(
         'CDOM' = 30,
-        'Si' = 38.4, 
-        'O2' = 200.7809
+        'Si' = 38.4
       )
 
       # these change depending on treatment
       
       # nh4
-      inps$NH4 <- obs[obs$tmt %in% i, 'NH4'] %>% 
+      inps$NH4 <- obs[obs$tmt_rep %in% i, 'NH4'] %>% 
         as.numeric
       
       # no3
-      inps$NO3 <- obs[obs$tmt %in% i, 'NO3'] %>% 
+      inps$NO3 <- obs[obs$tmt_rep %in% i, 'NO3'] %>% 
         as.numeric
       
       # po4
-      inps$PO4 <- obs[obs$tmt %in% i, 'PO4'] %>% 
+      inps$PO4 <- obs[obs$tmt_rep %in% i, 'PO4'] %>% 
         as.numeric
       
       ## set input PAR and temp files    
       load(file = 'rdata/flaskhobo.RData')
-      exp_inp(flaskhobo, getvar = 'par', gettmt = i)
-      exp_inp(flaskhobo, getvar = 'temp', gettmt = i)
+      exp_inp(flaskhobo, getvar = 'par', gettmt = gsub('_.*$', '', i))
+      exp_inp(flaskhobo, getvar = 'temp', gettmt = gsub('_.*$', '', i))
       
       ## run the model with parameters
       # sometimes fishtank crashes, so try again until it works
@@ -2108,7 +2107,7 @@ fishopt <- function(pars, minv, maxv, ...){
  
       # find end time in obs to grab in tocmp
       endtm <- obs %>% 
-        filter(tmt %in% i) %>% 
+        filter(tmt_rep %in% i) %>% 
         .$end
       
       # get modeled O2 at end time
@@ -2117,7 +2116,7 @@ fishopt <- function(pars, minv, maxv, ...){
         .$O2
   
       # append to output
-      obs[obs$tmt %in% i, 'modO2'] <- modO2
+      obs[obs$tmt_rep %in% i, 'modO2'] <- modO2
       restmp[[i]] <- tocmp
       
     }
