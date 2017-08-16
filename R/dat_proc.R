@@ -66,7 +66,7 @@ idpars <- get_cmbs(tocal_all, 'O2', coll = FALSE, pert = NULL)
 
 cals <- vector('list', length = length(idpars))
 names(cals) <- names(idpars)
-for(idpar in names(idpars)){
+for(idpar in 'Optics'){#:names(idpars)){
 
  # output
  cat(idpar, '\n')
