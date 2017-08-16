@@ -2075,6 +2075,10 @@ fishopt <- function(pars, minv, maxv, ...){
 
       # these change depending on treatment
       
+      # O2
+      inps$O2 <- obs[obs$tmt_rep %in% i, 'sttO2'] %>% 
+        as.numeric
+      
       # nh4
       inps$NH4 <- obs[obs$tmt_rep %in% i, 'NH4'] %>% 
         as.numeric
