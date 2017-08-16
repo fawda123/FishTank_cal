@@ -2193,6 +2193,6 @@ exp_inp <- function(flaskhobo, getvar = c('temp', 'par'), gettmt = c('lt', 'dk',
   
   # output directory and write
   outdir <- paste0('data/FishTank/INPUT/', getvar, '.dat')
-  write.table(fl, outdir, sep = '\t', row.names = FALSE, quote = FALSE, col.names = FALSE)
+  write.table(fl, outdir, sep = ' ', row.names = FALSE, quote = FALSE, col.names = FALSE)
   
 }
